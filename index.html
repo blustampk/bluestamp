@@ -5,10 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bluestamp</title>
 <meta name="description" content="One person in Dubai. Send one document your team retypes; get a short video of it entering itself.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='3' fill='none' stroke='%231F4DA1' stroke-width='3' transform='rotate(-7 16 16)'/%3E%3Cpath d='M9 16.5l5 5 9.5-10' fill='none' stroke='%231F4DA1' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://blustampk.github.io/bluestamp/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bluestamp">
+<meta property="og:description" content="One person in Dubai. Send one document your team retypes; get a short video of it entering itself.">
+<meta property="og:url" content="https://blustampk.github.io/bluestamp/">
+<meta property="og:image" content="https://blustampk.github.io/bluestamp/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
 </head>
 <body>
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
 <style>
   :root {
     --ground: #F5F6F4;
@@ -462,24 +474,25 @@
         <input type="hidden" name="ref" id="h-ref" value="">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_next" id="h-next" value="">
         <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <div class="two">
-          <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" type="text" placeholder="Dana Haddad"></div>
+          <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" type="text" required placeholder="Dana Haddad"></div>
           <div class="field"><label for="f-email">Your email <small>where the video goes</small></label><input id="f-email" name="email" type="email" required placeholder="dana@haddadfreight.ae"></div>
         </div>
         <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" type="text" placeholder="Haddad Freight LLC"></div>
-        <div class="field"><label for="f-doc">What the document is <small>the thing that gets retyped</small></label><input id="f-doc" name="document" type="text" placeholder="Supplier invoices, as PDFs, from about 40 suppliers"></div>
+        <div class="field"><label for="f-doc">What the document is <small>the thing that gets retyped</small></label><input id="f-doc" name="document" type="text" required placeholder="Supplier invoices, as PDFs, from about 40 suppliers"></div>
         <div class="two">
           <div class="field"><label for="f-vol">Roughly how many a week</label><input id="f-vol" name="how_many_a_week" type="text" placeholder="60 to 80"></div>
           <div class="field"><label for="f-dest">Where it ends up <small>which system or file</small></label><input id="f-dest" name="where_it_ends_up" type="text" placeholder="Zoho Books, then a tracking sheet"></div>
         </div>
         <div class="field"><label for="f-more">Anything else <small>optional</small></label><textarea id="f-more" name="anything_else" placeholder="Two of us do it every Tuesday morning. The supplier layouts change all the time."></textarea></div>
-        <div class="field"><label for="f-file">The document <small>PDF, photo or scan, up to 10 MB. Redact anything you like.</small></label><input id="f-file" name="attachment" type="file" accept=".pdf,image/*,.xlsx,.xls,.csv,.docx,.doc"></div>
+        <div class="field"><label for="f-file">The document <small>PDF, photo or scan, up to 10 MB. Redact anything you like.</small></label><input id="f-file" name="attachment" type="file" accept=".pdf,image/*,.xlsx,.xls,.csv,.docx,.doc"><p class="muted small" id="nofile">No document attached: the reply will be one question rather than a video. Attach one and the video follows.</p></div>
         <div class="actions">
           <button class="btn" type="submit">Send</button>
         </div>
-        <p class="muted small">Sent from this page, file included; a short confirmation page follows, then use Back to return here. If nothing happens, email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and “one document” in the subject.</p>
-        <p class="status" id="status"></p>
+        <p class="muted small">Sent from this page, file included. You land on a short confirmation page with your reference number; a link there brings you back. If nothing happens, email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and “one document” in the subject.</p>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
       </form>
       <div class="compose" aria-label="Preview of the email">
         <div class="spec-label"><span>What I’ll receive</span><span id="ref-label" class="mono"></span></div>
@@ -624,8 +637,10 @@
     /* ================= dialogs ================= */
     var dlgSend = $('dlg-send'), dlgEx = $('dlg-ex');
     var currentEx = 0;
+    var lastTrigger = null;
     function openDialog(d) {
       if (d.open) return;
+      if (document.activeElement && document.activeElement !== document.body) lastTrigger = document.activeElement;
       if (dlgSend.open && d !== dlgSend) dlgSend.close();
       if (dlgEx.open && d !== dlgEx) dlgEx.close();
       if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
@@ -645,6 +660,7 @@
       if (location.hash !== '#ex-' + ex.id) history.replaceState(null, '', '#ex-' + ex.id);
       openDialog(dlgEx);
       $('ex-body').scrollTop = 0;
+      try { $('ex-title').setAttribute('tabindex', '-1'); $('ex-title').focus({ preventScroll: true }); } catch (e) {}
     }
     $('ex-prev').addEventListener('click', function () { showExample(currentEx - 1); });
     $('ex-next').addEventListener('click', function () { showExample(currentEx + 1); });
@@ -666,6 +682,7 @@
       d.addEventListener('click', function (ev) { if (ev.target === d) d.close(); });
       d.addEventListener('close', function () {
         if (!dlgSend.open && !dlgEx.open) document.body.classList.remove('modal-open');
+        if (lastTrigger && document.contains(lastTrigger) && !dlgSend.open && !dlgEx.open) { try { lastTrigger.focus(); } catch (e) {} }
         if (/^#(send|ex-)/.test(location.hash)) history.replaceState(null, '', '#home');
       });
     });
@@ -708,6 +725,8 @@
       $('h-subject').value = subject;
       $('h-replyto').value = val('f-email');
       $('h-ref').value = token;
+      $('h-next').value = location.origin + location.pathname.replace(/[^/]*$/, '') + 'thanks.html?ref=' + encodeURIComponent(token);
+      $('nofile').hidden = !!($('f-file').files && $('f-file').files.length);
       var lines = ['Company: ' + val('f-company'), 'Email: ' + val('f-email'), 'What this document is: ' + val('f-doc'),
                    'Roughly how many a week: ' + val('f-vol'), 'Where it ends up (which system): ' + val('f-dest')];
       if (val('f-more')) { lines.push(''); lines.push(val('f-more')); }

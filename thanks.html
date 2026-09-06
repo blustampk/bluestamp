@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sent · Bluestamp</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='3' fill='none' stroke='%231F4DA1' stroke-width='3' transform='rotate(-7 16 16)'/%3E%3Cpath d='M9 16.5l5 5 9.5-10' fill='none' stroke='%231F4DA1' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+  :root { --ground: #F5F6F4; --ink: #15191E; --muted: #5C6270; --rule-2: #E6E8E3; --stamp: #1F4DA1; --sheet: #FFFFFF; --sheet-ink: #1B1F26; --sheet-muted: #6B7078; --sheet-rule: #DADDE2; --marker: #FFE977; --line-h: 32px; }
+  @media (prefers-color-scheme: dark) { :root { --ground: #15171C; --ink: #ECEDEA; --muted: #A3A8B3; --rule-2: #22262D; --stamp: #84A6F0; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--ground) repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line-h) - 1px), var(--rule-2) calc(var(--line-h) - 1px), var(--rule-2) var(--line-h)); color: var(--ink); font-family: "Public Sans", "Segoe UI", Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.55; }
+  .sheet { position: relative; width: min(560px, 100%); background: var(--sheet); color: var(--sheet-ink); border-radius: 2px; padding: 30px 32px 34px; box-shadow: 0 1px 0 rgba(21,25,30,.05), 0 20px 40px -26px rgba(21,25,30,.4); font-family: "Courier Prime", "Courier New", monospace; font-size: .95rem; }
+  .sheet::before { content: ""; position: absolute; inset: 6px -6px -8px 8px; background: var(--sheet); border-radius: 2px; z-index: -1; transform: rotate(1.4deg); opacity: .9; box-shadow: 0 8px 20px -14px rgba(21,25,30,.35); }
+  h1 { font-family: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif; font-weight: 800; font-size: 1.7rem; letter-spacing: -0.02em; line-height: 1.05; margin: 0 0 18px; font-variation-settings: "opsz" 48, "wdth" 88; }
+  dl { margin: 0 0 20px; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+  dt { color: var(--sheet-muted); } dd { margin: 0; }
+  .mk { background: var(--marker); padding: 0 .25em; border-radius: 2px; }
+  .stamp { position: absolute; right: 22px; bottom: 20px; transform: rotate(-8deg); border: 2px solid var(--stamp); color: var(--stamp); border-radius: 3px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: .78rem; letter-spacing: .16em; padding: 5px 9px; text-transform: uppercase; opacity: .9; }
+  a { color: var(--stamp); }
+  .back { font-family: "Public Sans", sans-serif; font-size: .95rem; }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <h1>Sent. Thank you.</h1>
+  <dl>
+    <dt>Reference</dt><dd class="mk" id="ref">on its way</dd>
+    <dt>What happens</dt><dd>I reply the same working day, Dubai time, Monday to Friday, with one question, then the video within two working days of having the document.</dd>
+    <dt>Your file</dt><dd>Opened by one person, deleted seven days after your video.</dd>
+  </dl>
+  <p class="back"><a href="./">Back to the site</a></p>
+  <div class="stamp">Received</div>
+</main>
+<script>
+  (function () {
+    var m = /[?&]ref=(DOC-[A-Z2-9]{6})/.exec(location.search);
+    if (m) document.getElementById('ref').textContent = m[1];
+  })();
+</script>
+</body>
+</html>
