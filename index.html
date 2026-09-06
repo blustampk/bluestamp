@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bluestamp</title>
+<meta name="description" content="One person in Dubai. Send one document your team retypes; get a short video of it entering itself.">
+</head>
+<body>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+  :root {
+    --ground: #F5F6F4;
+    --ground-2: #EDEFEB;
+    --ink: #15191E;
+    --muted: #5C6270;
+    --faint: #8B909B;
+    --rule: #D9DBD6;
+    --rule-2: #E6E8E3;
+    --stamp: #1F4DA1;
+    --stamp-ink: #FFFFFF;
+    --sheet: #FFFFFF;
+    --sheet-ink: #1B1F26;
+    --sheet-muted: #6B7078;
+    --sheet-rule: #DADDE2;
+    --marker: #FFE977;
+    --marker-ink: #1B1F26;
+    --good: #1E7A4B;
+    --warn: #A65A11;
+    --backdrop: rgba(12, 15, 20, .55);
+    --shadow-sm: 0 1px 0 rgba(21,25,30,.05), 0 8px 20px -14px rgba(21,25,30,.35);
+    --shadow: 0 1px 0 rgba(21,25,30,.05), 0 20px 40px -26px rgba(21,25,30,.4);
+    --line-h: 32px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #15171C; --ground-2: #1B1E24; --ink: #ECEDEA; --muted: #A3A8B3; --faint: #767B86;
+      --rule: #2B2F37; --rule-2: #22262D; --stamp: #84A6F0; --stamp-ink: #0E1524;
+      --good: #5CC08A; --warn: #E0A15C; --backdrop: rgba(0,0,0,.7);
+      --shadow-sm: 0 1px 0 rgba(0,0,0,.4), 0 8px 20px -14px rgba(0,0,0,.7);
+      --shadow: 0 1px 0 rgba(0,0,0,.4), 0 20px 40px -26px rgba(0,0,0,.85);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #15171C; --ground-2: #1B1E24; --ink: #ECEDEA; --muted: #A3A8B3; --faint: #767B86;
+    --rule: #2B2F37; --rule-2: #22262D; --stamp: #84A6F0; --stamp-ink: #0E1524;
+    --good: #5CC08A; --warn: #E0A15C; --backdrop: rgba(0,0,0,.7);
+    --shadow-sm: 0 1px 0 rgba(0,0,0,.4), 0 8px 20px -14px rgba(0,0,0,.7);
+    --shadow: 0 1px 0 rgba(0,0,0,.4), 0 20px 40px -26px rgba(0,0,0,.85);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line-h) - 1px), var(--rule-2) calc(var(--line-h) - 1px), var(--rule-2) var(--line-h));
+    color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  body.modal-open { overflow: hidden; }
+  h1, h2, h3, .brand, .btn, .step-time, .navlink, .mlabel, .becomes, .rec-title, .faq dt { font-family: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.04; font-weight: 800; letter-spacing: -0.02em; }
+  h1 { font-size: clamp(2.2rem, 5.2vw, 3.9rem); font-variation-settings: "opsz" 96, "wdth" 86; }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-variation-settings: "opsz" 72, "wdth" 88; }
+  h3 { font-size: 1.2rem; font-weight: 700; font-variation-settings: "opsz" 24, "wdth" 94; }
+  p { margin: 0; }
+  a { color: var(--stamp); }
+  .muted { color: var(--muted); }
+  .mono { font-family: "Courier Prime", "Courier New", monospace; }
+  .small { font-size: .9rem; }
+  [hidden] { display: none !important; }
+  button { font: inherit; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- top bar ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 10; background: var(--ground); }
+  .brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; font-variation-settings: "opsz" 24, "wdth" 82; text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+  .brand .mark { width: 28px; height: 28px; border: 2px solid var(--stamp); border-radius: 3px; color: var(--stamp); display: grid; place-items: center; transform: rotate(-7deg); }
+  .brand .mark svg { width: 16px; height: 16px; }
+  .navlinks { display: flex; gap: 4px; align-items: center; }
+  .navlink { color: var(--muted); text-decoration: none; font-weight: 600; font-size: .92rem; padding: 8px 12px; border-radius: 4px; font-variation-settings: "opsz" 24, "wdth" 92; background: none; border: 0; cursor: pointer; }
+  .navlink:hover, .navlink:focus-visible { color: var(--ink); background: var(--ground-2); outline: none; }
+  .navlink.primary { background: var(--stamp); color: var(--stamp-ink); }
+  .navlink.primary:hover { filter: brightness(1.07); background: var(--stamp); color: var(--stamp-ink); }
+  @media (max-width: 720px) { .navlink:not(.primary) { display: none; } }
+
+  /* ---------- buttons ---------- */
+  .btn { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.02rem; letter-spacing: -0.005em;
+         background: var(--stamp); color: var(--stamp-ink); text-decoration: none; padding: 15px 22px; border-radius: 4px; border: 0; cursor: pointer;
+         font-variation-settings: "opsz" 24, "wdth" 92; }
+  .btn:hover { filter: brightness(1.07); }
+  .btn:focus-visible { outline: 2px solid var(--stamp); outline-offset: 3px; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+  .btn.ghost:hover { border-color: var(--ink); filter: none; }
+  .btn.small { font-size: .88rem; padding: 10px 14px; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 48px; align-items: center; padding: 72px 0 64px; border-bottom: 1px solid var(--rule); }
+  .hero-copy { display: grid; gap: 22px; }
+  .lede { font-size: 1.2rem; color: var(--muted); max-width: 50ch; line-height: 1.5; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .fine { font-size: .88rem; color: var(--muted); max-width: 48ch; }
+  @media (max-width: 880px) { .hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 0 44px; } }
+
+  /* ---------- sheets (the paperwork zone: caps allowed here only) ---------- */
+  .sheet { background: var(--sheet); color: var(--sheet-ink); box-shadow: var(--shadow); border-radius: 2px; padding: 24px 26px 22px;
+           font-family: "Courier Prime", "Courier New", monospace; font-size: .88rem; line-height: 1.5; position: relative; }
+  .sheet.stack::before { content: ""; position: absolute; inset: 6px -6px -8px 8px; background: var(--sheet); border-radius: 2px; z-index: -1; transform: rotate(1.4deg); box-shadow: var(--shadow-sm); opacity: .9; }
+  .sheet .hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--sheet-rule); padding-bottom: 10px; margin-bottom: 12px; }
+  .sheet .hdr b { font-weight: 700; letter-spacing: .04em; }
+  .sheet .hdr b small { display: block; font-weight: 400; letter-spacing: 0; font-size: .78rem; color: var(--sheet-muted); }
+  .sheet .hdr span { color: var(--sheet-muted); font-size: .78rem; white-space: nowrap; }
+  .sheet .grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 0; }
+  .sheet .grid dt { color: var(--sheet-muted); }
+  .sheet .grid dd { margin: 0; }
+  .sheet .lines { margin-top: 14px; border-top: 1px solid var(--sheet-rule); padding-top: 10px; display: grid; gap: 4px; color: var(--sheet-muted); }
+  .sheet .lines div { display: flex; justify-content: space-between; gap: 12px; }
+  .sheet .total { display: flex; justify-content: space-between; border-top: 1px solid var(--sheet-ink); margin-top: 10px; padding-top: 8px; font-weight: 700; }
+  .sheet .redact { display: inline-block; background: var(--sheet-ink); color: transparent; border-radius: 1px; user-select: none; }
+  .mk { color: var(--marker-ink); padding: 0 .25em; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+        background: linear-gradient(var(--marker), var(--marker)) no-repeat left / 100% 100%; }
+  .stamp { position: absolute; right: 20px; bottom: 18px; transform: rotate(-8deg); border: 2px solid var(--stamp); color: var(--stamp); border-radius: 3px;
+           font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: .74rem; letter-spacing: .16em; padding: 5px 9px; opacity: .9; text-transform: uppercase; }
+  .note-sheet { padding: 18px 20px; font-size: .86rem; max-width: 60ch; }
+  .note-sheet p { margin: 0 0 6px; }
+  .note-sheet p:last-child { margin: 0; }
+
+  /* ---------- hero specimen animation ---------- */
+  .specimen { display: grid; gap: 14px; position: relative; }
+  .spec-label { font-size: .82rem; font-weight: 500; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; }
+  .spec-label button { background: none; border: 0; color: var(--faint); font: 500 .82rem "Public Sans", sans-serif; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+  .spec-label button:hover { color: var(--ink); }
+  .anim .mk { background-size: 0% 100%; transition: background-size .45s cubic-bezier(.2,.7,.2,1); }
+  .anim.marked .mk { background-size: 100% 100%; }
+  .flow { display: flex; align-items: center; gap: 10px; padding: 0 4px; color: var(--faint); font-size: .82rem; }
+  .flow svg { width: 22px; height: 22px; flex: none; }
+  .row { background: var(--sheet); color: var(--sheet-ink); border-radius: 2px; box-shadow: var(--shadow); font-family: "Courier Prime", "Courier New", monospace; font-size: .84rem; overflow-x: auto; }
+  .row table { border-collapse: collapse; width: 100%; min-width: 440px; }
+  .row th { font: 500 .74rem "Public Sans", sans-serif; color: var(--sheet-muted); text-align: left; padding: 9px 12px 5px; border-bottom: 1px solid var(--sheet-rule); }
+  .row td { padding: 9px 12px 11px; white-space: nowrap; }
+  .row td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .row td.ok { color: var(--good); font-weight: 700; }
+  .fly { position: fixed; z-index: 50; pointer-events: none; font-family: "Courier Prime", "Courier New", monospace; font-size: .86rem; color: var(--marker-ink);
+         background: var(--marker); padding: 0 .25em; border-radius: 2px; will-change: transform, opacity; transition: transform .7s cubic-bezier(.4,0,.2,1), opacity .2s .55s; }
+  .open-ex { position: absolute; inset: 0; background: none; border: 0; cursor: pointer; border-radius: 2px; }
+  .open-ex:focus-visible { outline: 2px solid var(--stamp); outline-offset: 4px; }
+  .sheet-wrap { position: relative; }
+  .sheet-tab { position: absolute; right: 14px; top: -10px; background: var(--sheet); color: var(--sheet-ink); font: 500 .78rem "Public Sans", sans-serif; padding: 3px 10px; border-radius: 2px; box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .15s; pointer-events: none; }
+  .sheet-wrap:hover .sheet-tab, .sheet-wrap:focus-within .sheet-tab { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .anim .mk, .fly, .sheet-tab { transition: none !important; } }
+
+  /* ---------- section shell ---------- */
+  section.sec { display: grid; grid-template-columns: 170px 1fr; gap: 24px 48px; padding: 64px 0; border-bottom: 1px solid var(--rule); scroll-margin-top: 80px; }
+  .mlabel { font-size: .95rem; font-weight: 600; color: var(--muted); padding-top: .4em; font-variation-settings: "opsz" 24, "wdth" 92; }
+  .body { display: grid; gap: 22px; }
+  .body > p { max-width: 64ch; }
+  @media (max-width: 760px) { section.sec { grid-template-columns: 1fr; gap: 12px; padding: 44px 0; } }
+
+  /* ---------- examples: an in-tray, not a grid ---------- */
+  .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 20px; margin-top: 6px; align-items: start; }
+  .card { display: grid; gap: 10px; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+  .card.wide { grid-column: span 2; }
+  .card .sheet { padding: 16px 18px 14px; font-size: .8rem; box-shadow: var(--shadow-sm); transition: transform .15s, box-shadow .15s; }
+  .card:hover .sheet, .card:focus-visible .sheet { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card:focus-visible { outline: none; }
+  .card .sheet .hdr { margin-bottom: 8px; padding-bottom: 6px; }
+  .becomes { font-size: .98rem; font-weight: 600; color: var(--ink); font-variation-settings: "opsz" 24, "wdth" 94; }
+  .becomes small { display: block; font-family: "Public Sans", sans-serif; font-weight: 400; font-size: .85rem; color: var(--muted); }
+  @media (max-width: 900px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } .card.wide { grid-column: span 2; } }
+  @media (max-width: 560px) { .gallery { grid-template-columns: 1fr; } .card.wide { grid-column: auto; } }
+  @media (prefers-reduced-motion: reduce) { .card .sheet { transition: none; } }
+
+  /* ---------- steps ---------- */
+  .steps { display: grid; }
+  .step { padding: 20px 0; border-top: 1px solid var(--rule); display: grid; gap: 4px; }
+  .step:last-child { border-bottom: 1px solid var(--rule); }
+  .step-time { font-weight: 700; font-size: 1.1rem; font-variation-settings: "opsz" 24, "wdth" 92; }
+  .step p { color: var(--muted); font-size: .98rem; max-width: 62ch; }
+  .step p b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- plain lists ---------- */
+  .plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 64ch; }
+  .plain li { padding-left: 18px; position: relative; }
+  .plain li::before { content: ""; position: absolute; left: 0; top: .7em; width: 8px; height: 2px; background: var(--faint); }
+  .faq { margin: 0; display: grid; gap: 0; max-width: 68ch; }
+  .faq dt { font-weight: 700; font-size: 1.02rem; padding: 16px 0 4px; border-top: 1px solid var(--rule); font-variation-settings: "opsz" 24, "wdth" 94; }
+  .faq dd { margin: 0 0 16px; color: var(--muted); }
+  .faq dd b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- who ---------- */
+  .who { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; }
+  .photo { width: 140px; aspect-ratio: 35 / 45; background: var(--sheet); box-shadow: var(--shadow-sm); border-radius: 2px; overflow: hidden; position: relative; transform: rotate(1.5deg); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo::after { content: ""; position: absolute; top: -8px; left: 50%; width: 18px; height: 34px; border: 2px solid var(--faint); border-radius: 9px; transform: translateX(-50%) rotate(12deg); background: transparent; }
+  .ident { display: grid; gap: 2px; color: var(--muted); font-size: .95rem; }
+  .ident b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 640px) { .who { grid-template-columns: 1fr; } .photo { transform: none; } }
+
+  /* ---------- bottom / footer ---------- */
+  .bottom { padding: 72px 0 40px; display: grid; gap: 22px; }
+  .bottom h2 { max-width: 18ch; font-size: clamp(2rem, 4.4vw, 3.2rem); }
+  footer { border-top: 1px solid var(--rule); padding: 22px 0 56px; display: grid; gap: 6px; font-size: .88rem; color: var(--muted); }
+  footer a, footer button { color: var(--muted); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+  footer a:hover, footer button:hover { color: var(--ink); }
+  footer .line { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+  /* ---------- dialogs ---------- */
+  dialog { border: 0; padding: 0; background: var(--ground); color: var(--ink); border-radius: 4px; width: min(1060px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; box-shadow: var(--shadow); margin: auto;
+           background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line-h) - 1px), var(--rule-2) calc(var(--line-h) - 1px), var(--rule-2) var(--line-h)); }
+  dialog::backdrop { background: var(--backdrop); }
+  .dlg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 26px 28px 0; }
+  .dlg-close { flex: none; width: 38px; height: 38px; border-radius: 4px; border: 1px solid var(--rule); background: var(--ground); color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+  .dlg-close:hover { color: var(--ink); border-color: var(--ink); }
+  .dlg-close:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+  .dlg-close svg { width: 18px; height: 18px; }
+  .dlg-body { padding: 22px 28px 30px; }
+  @media (max-width: 640px) { .dlg-head { padding: 20px 18px 0; } .dlg-body { padding: 18px 18px 24px; } }
+
+  /* send dialog */
+  .send { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .send { grid-template-columns: 1fr; } }
+  form { display: grid; gap: 16px; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-weight: 600; font-size: .92rem; }
+  .field label small { font-weight: 400; color: var(--faint); margin-left: 6px; }
+  .field input, .field textarea { font: 400 1rem "Public Sans", sans-serif; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px; width: 100%; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .field input, :root:not([data-theme="light"]) .field textarea { background: var(--ground-2); } }
+  :root[data-theme="dark"] .field input, :root[data-theme="dark"] .field textarea { background: var(--ground-2); }
+  .field input:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--stamp); outline-offset: 1px; border-color: var(--stamp); }
+  .field textarea { min-height: 88px; resize: vertical; }
+  .field input[type="file"] { padding: 10px 12px; background: var(--ground-2); cursor: pointer; }
+  .field input[type="file"]::file-selector-button { font: 600 .88rem "Public Sans", sans-serif; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; margin-right: 10px; cursor: pointer; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .status { font-size: .9rem; color: var(--muted); min-height: 1.4em; }
+  .compose { display: grid; gap: 10px; position: relative; }
+  .mail { background: var(--sheet); color: var(--sheet-ink); border-radius: 3px; box-shadow: var(--shadow); overflow: hidden; position: relative; }
+  .mail .line { display: grid; grid-template-columns: 74px 1fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid var(--sheet-rule); font-size: .9rem; }
+  .mail .line span:first-child { color: var(--sheet-muted); }
+  .mail .line b { font-weight: 600; word-break: break-word; }
+  .mail pre { margin: 0; padding: 18px; white-space: pre-wrap; word-wrap: break-word; font-family: "Courier Prime", "Courier New", monospace; font-size: .88rem; line-height: 1.55; color: var(--sheet-ink); min-height: 200px; }
+  .mail .att { padding: 12px 18px; border-top: 1px dashed var(--sheet-rule); font-size: .85rem; color: var(--sheet-muted); }
+  .sent-stamp { position: absolute; right: 22px; bottom: 54px; transform: rotate(-10deg) scale(1); border: 3px solid var(--stamp); color: var(--stamp); border-radius: 4px; padding: 8px 14px;
+                font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: .14em; text-transform: uppercase; opacity: .92; pointer-events: none; }
+
+  /* example dialog */
+  .ex { display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); gap: 22px; align-items: start; }
+  .ex .arrow { display: grid; place-items: center; height: 100%; min-height: 120px; color: var(--faint); }
+  .ex .arrow svg { width: 28px; height: 28px; }
+  .ex-col { display: grid; gap: 12px; }
+  .rec { background: var(--sheet); color: var(--sheet-ink); border-radius: 3px; box-shadow: var(--shadow); overflow: hidden; }
+  .rec-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--sheet-rule); font-weight: 700; font-size: .95rem; font-variation-settings: "opsz" 24, "wdth" 92; }
+  .rec-title span { font: 500 .8rem "Public Sans", sans-serif; color: var(--sheet-muted); }
+  .rec dl { margin: 0; display: grid; grid-template-columns: minmax(120px, auto) 1fr; }
+  .rec dt, .rec dd { padding: 9px 16px; border-bottom: 1px solid var(--sheet-rule); margin: 0; font-size: .9rem; }
+  .rec dt { color: var(--sheet-muted); font-size: .84rem; padding-top: 10px; }
+  .rec dd { font-family: "Courier Prime", "Courier New", monospace; }
+  .rec dd.flag { color: var(--warn); }
+  .rec dl > :nth-last-child(-n+2) { border-bottom: 0; }
+  .rec .drafted { padding: 12px 16px; border-top: 1px solid var(--sheet-rule); font-size: .86rem; color: var(--sheet-ink); white-space: pre-wrap; font-family: "Courier Prime", "Courier New", monospace; background: var(--ground-2); }
+  .rec .person { padding: 12px 16px; border-top: 1px solid var(--sheet-rule); font-family: "Courier Prime", "Courier New", monospace; font-size: .86rem; line-height: 1.6; }
+  .ex-foot { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .ex-nav { display: flex; gap: 8px; }
+  @media (max-width: 760px) { .ex { grid-template-columns: 1fr; } .ex .arrow { min-height: 0; transform: rotate(90deg); height: 40px; } }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--ground); font: 600 .82rem "Public Sans", sans-serif; padding: 9px 16px; border-radius: 4px; opacity: 0; transition: opacity .18s; pointer-events: none; z-index: 60; }
+  .toast.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="#home"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span>Bluestamp</a>
+    <nav class="navlinks" aria-label="Site">
+      <a class="navlink" href="#home-examples">Examples</a>
+      <a class="navlink" href="#home-questions">Questions</a>
+      <a class="navlink" href="#home-who">Who I am</a>
+      <button class="navlink primary" type="button" data-open-send>Send a document</button>
+    </nav>
+  </div>
+
+  <div class="hero" id="home">
+    <div class="hero-copy">
+      <h1>Send me one document your team retypes by hand. I’ll send back a short video of the same fields entering themselves.</h1>
+      <p class="lede">Under two minutes, made on your file, and honest about what still needs a person. Supplier invoices, booking confirmations, CVs, listings, claims, quotes. No pitch, nothing to book. If it isn’t useful, keep it anyway.</p>
+      <div class="cta-row">
+        <button class="btn" type="button" data-open-send>Send a document</button>
+        <a class="btn ghost" href="#home-examples">See six examples</a>
+      </div>
+      <p class="fine">Redacted copies are fine. Opened by one person, nobody else, and deleted seven days after your video.</p>
+    </div>
+
+    <div class="specimen anim" id="spec" aria-label="Example: an invoice and the row it becomes">
+      <div class="spec-label"><span>What your team does by hand (example)</span><button type="button" id="replay" hidden>Play again</button></div>
+      <div class="sheet-wrap">
+        <div class="sheet stack" id="sheet">
+          <div class="hdr"><b>AL RAYAN RACKING LLC<small>TRN 100 4471 2830 003</small></b><span>TAX INVOICE</span></div>
+          <dl class="grid">
+            <dt>Invoice no.</dt><dd><span class="mk" data-src="inv">INV-20931</span></dd>
+            <dt>Date</dt><dd><span class="mk" data-src="date">14 AUG 2026</span></dd>
+            <dt>Your ref.</dt><dd><span class="mk" data-src="po">PO-7712</span></dd>
+            <dt>Terms</dt><dd>30 days</dd>
+          </dl>
+          <div class="lines">
+            <div><span>Pallet racking, 12 bays</span><span>3,960.00</span></div>
+            <div><span>Delivery and install</span><span>640.00</span></div>
+            <div><span>VAT 5%</span><span>230.00</span></div>
+          </div>
+          <div class="total"><span>TOTAL DUE</span><span class="mk" data-src="total">AED 4,830.00</span></div>
+          <div class="stamp" id="stamp">Received</div>
+        </div>
+        <button class="open-ex" type="button" data-open-ex="invoice" aria-label="Open the full worked example for this invoice"></button>
+        <span class="sheet-tab">Open the full example</span>
+      </div>
+      <div class="flow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3v16M6 13l6 6 6-6"/></svg>
+        <span>the same four fields, entered in seconds and matched to the purchase order, not retyped</span>
+      </div>
+      <div class="row">
+        <table>
+          <thead><tr><th>Supplier</th><th>Invoice</th><th>Date</th><th>PO</th><th>Total</th><th></th></tr></thead>
+          <tbody><tr>
+            <td>Al Rayan Racking</td>
+            <td data-dst="inv">INV-20931</td>
+            <td data-dst="date">2026-08-14</td>
+            <td data-dst="po">PO-7712</td>
+            <td class="num" data-dst="total">4,830.00</td>
+            <td class="ok" id="ok">matched</td>
+          </tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <section class="sec" id="home-examples">
+    <div class="mlabel">Worked examples</div>
+    <div class="body">
+      <h2>Six documents, and what each one turns into</h2>
+      <p class="muted">Made-up firms, real shapes. Open any of them to see the document on one side and the record it becomes on the other, including what a person still checks.</p>
+      <div class="gallery" id="gallery"></div>
+      <p class="muted small" style="border-top:1px solid var(--rule);padding-top:14px;">If yours isn’t here, send it anyway. These are only the shapes I see most.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="home-after">
+    <div class="mlabel">After you send</div>
+    <div class="body">
+      <h2>What happens next, in order</h2>
+      <div class="steps">
+        <div class="step"><div class="step-time">Same working day (Dubai time, Monday to Friday)</div><p>I reply with one question, usually <b>“where does this end up?”</b>, so the video shows the result landing where you actually need it.</p></div>
+        <div class="step"><div class="step-time">Within two working days</div><p>A recording under two minutes: <b>your document going in, the result coming out</b>, and the things I’d flag for a person to check. Made from your file, using whatever is left readable after you redact.</p></div>
+        <div class="step"><div class="step-time">Only if you want it running</div><p>A one-page summary with the exact price. <b>Setup from AED 9,200 (about USD 2,500)</b>, paid on the day the tool does on your real documents what the video showed, not before. Then <b>from AED 2,750 a month</b>, which covers fixing it when a supplier changes a layout, with a stop-any-month line in writing. Nothing gets built until you’ve seen the video.</p></div>
+      </div>
+      <div class="sheet note-sheet">
+        <p><b>HOW THE VIDEO IS MADE</b></p>
+        <p>It is made from your file, not a demo file: the fields as they were read from your document, entering the sheet or system you named, and every check it raised.</p>
+        <p>No voice-over, no music, nothing staged. If something in your file couldn’t be read, the recording shows the gap instead of hiding it.</p>
+        <p>Under two minutes, sent as a file in the email so you can forward it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="home-file">
+    <div class="mlabel">Your document</div>
+    <div class="body">
+      <h2>What happens to the file you send</h2>
+      <ul class="plain">
+        <li><b>Who opens it:</b> me, nobody else. One person, not a team, not a contractor.</li>
+        <li><b>Where it goes:</b> my laptop in Dubai, and the document-reading service I build with (Anthropic), which runs outside the UAE, keeps its logs for up to 30 days and does not train on them.</li>
+        <li><b>What is never done with it:</b> not shown to anyone, not used as an example, not put in a shared folder.</li>
+        <li><b>When it is deleted:</b> seven days after your video, from my machine, whether or not you write back.</li>
+      </ul>
+      <p class="muted">Redacted or dummy copies are welcome; the video will use whatever is left readable. Personal data in the document is handled under the UAE Personal Data Protection Law (Federal Decree-Law 45 of 2021). If a file arrives with an ID or passport number you missed, I black it out before it is read.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="home-questions">
+    <div class="mlabel">Questions you’d ask on a call</div>
+    <div class="body">
+      <h2>Since there isn’t one</h2>
+      <dl class="faq">
+        <dt>What if it arrives as a photo or a scan?</dt>
+        <dd>Fine. Phone photos, scans, PDFs, emails. If part of it is unreadable, the video shows that too, and I’ll say what would help.</dd>
+        <dt>Which systems can it put things into?</dt>
+        <dd>Spreadsheets (Excel, Google Sheets), Zoho Books, and anything with an import, an export or an inbox: CSV files, email drafts, portal forms your staff paste into. <b>If your system has no way in, I’ll say so before you pay anything.</b></dd>
+        <dt>What happens when a supplier changes their layout?</dt>
+        <dd>It flags what it couldn’t read instead of guessing. I fix it, usually the same day. That is what the monthly fee is for.</dd>
+        <dt>Who fixes it, and how fast?</dt>
+        <dd>Me. Same working day, Dubai time, Monday to Friday. There is no ticket queue because there is no one else.</dd>
+        <dt>What does the monthly fee cover, and how much is it?</dt>
+        <dd>Every document checked, fixes when a layout or a form changes, and me on WhatsApp during working hours. <b>From AED 2,750 a month.</b> The exact figure is in the one-page summary after the video, and it depends on how many outputs you want and whether they land in a system rather than a sheet.</dd>
+        <dt>Can I stop? What do I keep?</dt>
+        <dd>Any month, in writing. You keep the tool, its settings and every file it produced. Nothing is held hostage.</dd>
+        <dt>Do my staff need to install anything?</dt>
+        <dd>No. Documents go in the way they arrive now: a folder, an inbox, a WhatsApp forward. The result lands where you asked.</dd>
+        <dt>Can I see it on my own documents before paying?</dt>
+        <dd><b>That is the video.</b> Nothing is built until you’ve seen it, and the setup fee is due only when the tool does on your real documents what the video showed.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="home-who">
+    <div class="mlabel">Who I am</div>
+    <div class="body">
+      <div class="who">
+        <div class="body">
+          <h2 id="who-title">One person, in Dubai</h2>
+          <div class="ident" id="ident"></div>
+          <p>I build one tool per firm, run it, and fix it when it breaks. I work by email and WhatsApp rather than calls. You get to reread everything, and I get to show you instead of tell you. I have no sales team and no office; the person who replies is the person who builds it. My full name and permit number are on the one-page summary before any money moves.</p>
+          <h3>Not for you if</h3>
+          <ul class="plain">
+            <li>You want it built before you’ve seen it work on your own paperwork.</li>
+            <li>Fewer than about twenty of these documents a month cross your desk. The retyping is cheaper than me.</li>
+            <li>The destination is a system with no export, no import and no way in.</li>
+            <li>You need someone on call at night and on weekends.</li>
+            <li>You want a call first.</li>
+          </ul>
+          <p class="muted">If that’s you, the video is still free and you can still keep it.</p>
+        </div>
+        <!-- Operator: set OPERATOR.photo below to a data: URI of a phone photo of you (plain wall, daylight, no filter, looking at the lens, 600px wide JPEG). No generated or stock faces. The frame is omitted until then. -->
+        <div class="photo" id="photo" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom">
+    <h2>Send the one that makes someone sigh.</h2>
+    <div class="cta-row">
+      <button class="btn" type="button" data-open-send>Send a document</button>
+      <p class="fine">Or email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and “one document” in the subject. I reply the same working day, Dubai time, Monday to Friday.</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="line"><b id="foot-name">Bluestamp</b><span id="foot-ident"></span></div>
+    <div class="line"><a href="mailto:komissarovb57@gmail.com" data-op="mailto">komissarovb57@gmail.com</a><button type="button" data-open-send>Send a document</button><span>No calls, by design.</span></div>
+  </footer>
+</div>
+
+<!-- ================= SEND DIALOG ================= -->
+<dialog id="dlg-send" aria-labelledby="send-title">
+  <div class="dlg-head">
+    <div>
+      <h2 id="send-title">Four lines and one attachment. That’s the whole thing.</h2>
+      <p class="muted" style="margin-top:8px;max-width:60ch;">It goes straight to me from this page, file included, with a reference number so nothing gets lost. No mail app, nothing to install.</p>
+      <p class="muted small" style="margin-top:8px;max-width:60ch;">Or skip the form: email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and the words “one document” in the subject.</p>
+    </div>
+    <button class="dlg-close" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="dlg-body">
+    <div class="send">
+      <form id="form" action="https://formsubmit.co/komissarovb57@gmail.com" method="POST" enctype="multipart/form-data" autocomplete="on">
+        <input type="hidden" name="_subject" id="h-subject" value="">
+        <input type="hidden" name="_replyto" id="h-replyto" value="">
+        <input type="hidden" name="ref" id="h-ref" value="">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div class="two">
+          <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" type="text" placeholder="Dana Haddad"></div>
+          <div class="field"><label for="f-email">Your email <small>where the video goes</small></label><input id="f-email" name="email" type="email" required placeholder="dana@haddadfreight.ae"></div>
+        </div>
+        <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" type="text" placeholder="Haddad Freight LLC"></div>
+        <div class="field"><label for="f-doc">What the document is <small>the thing that gets retyped</small></label><input id="f-doc" name="document" type="text" placeholder="Supplier invoices, as PDFs, from about 40 suppliers"></div>
+        <div class="two">
+          <div class="field"><label for="f-vol">Roughly how many a week</label><input id="f-vol" name="how_many_a_week" type="text" placeholder="60 to 80"></div>
+          <div class="field"><label for="f-dest">Where it ends up <small>which system or file</small></label><input id="f-dest" name="where_it_ends_up" type="text" placeholder="Zoho Books, then a tracking sheet"></div>
+        </div>
+        <div class="field"><label for="f-more">Anything else <small>optional</small></label><textarea id="f-more" name="anything_else" placeholder="Two of us do it every Tuesday morning. The supplier layouts change all the time."></textarea></div>
+        <div class="field"><label for="f-file">The document <small>PDF, photo or scan, up to 10 MB. Redact anything you like.</small></label><input id="f-file" name="attachment" type="file" accept=".pdf,image/*,.xlsx,.xls,.csv,.docx,.doc"></div>
+        <div class="actions">
+          <button class="btn" type="submit">Send</button>
+        </div>
+        <p class="muted small">Sent from this page, file included; a short confirmation page follows, then use Back to return here. If nothing happens, email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and “one document” in the subject.</p>
+        <p class="status" id="status"></p>
+      </form>
+      <div class="compose" aria-label="Preview of the email">
+        <div class="spec-label"><span>What I’ll receive</span><span id="ref-label" class="mono"></span></div>
+        <div class="mail">
+          <div class="line"><span>To</span><b data-op="email">komissarovb57@gmail.com</b></div>
+          <div class="line"><span>Subject</span><b id="p-subject"></b></div>
+          <pre id="p-body"></pre>
+          <div class="att" id="p-att">No document attached yet.</div>
+          <div class="sent-stamp" id="sent-stamp" hidden>Sent, thank you</div>
+        </div>
+        <p class="fine">Opened by one person only. Deleted seven days after your video. The reference number is how I match your email to the video I send back; it carries nothing else.</p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- ================= EXAMPLE DIALOG ================= -->
+<dialog id="dlg-ex" aria-labelledby="ex-title">
+  <div class="dlg-head">
+    <div>
+      <h2 id="ex-title"></h2>
+      <p class="muted small" id="ex-count" style="margin-top:6px;"></p>
+      <p class="muted" id="ex-sub" style="margin-top:8px;max-width:60ch;"></p>
+    </div>
+    <button class="dlg-close" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="dlg-body">
+    <div class="ex" id="ex-body"></div>
+    <div class="ex-foot">
+      <div class="ex-nav">
+        <button class="btn ghost small" type="button" id="ex-prev">Previous</button>
+        <button class="btn ghost small" type="button" id="ex-next">Next example</button>
+      </div>
+      <button class="btn small" type="button" data-open-send>Send one like this</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Copied</div>
+
+<script>
+  (function () {
+    /* ---- Operator details. Change these here only; the page fills them in everywhere. Empty fields are left out, never shown blank. ---- */
+    var OPERATOR = {
+      name: '',                        // left empty on purpose: no name on the page. If ever set, it appears in the "Who I am" heading and the footer only.
+      email: 'komissarovb57@gmail.com',
+      city: 'Dubai, UAE',
+      area: '',                        // e.g. 'Business Bay'
+      whatsapp: '',                    // e.g. '+971 50 123 4567'
+      permit: '',                      // e.g. 'Freelance permit no. 12345' the day it is issued; leave empty until then
+      photo: ''                        // data:image/jpeg;base64,... of a real photo; leave empty until then
+    };
+
+    var ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var $ = function (id) { return document.getElementById(id); };
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    /* ---- fill operator details ---- */
+    if (OPERATOR.name) { $('who-title').textContent = OPERATOR.name; $('foot-name').textContent = OPERATOR.name; }
+    document.querySelectorAll('[data-op="email"]').forEach(function (el) { el.textContent = OPERATOR.email; });
+    document.querySelectorAll('[data-op="mailto"]').forEach(function (el) { el.textContent = OPERATOR.email; el.setAttribute('href', 'mailto:' + OPERATOR.email); });
+    var identParts = [];
+    if (OPERATOR.city) identParts.push(OPERATOR.city + (OPERATOR.area ? ', ' + OPERATOR.area : ''));
+    if (OPERATOR.permit) identParts.push(OPERATOR.permit);
+    if (OPERATOR.whatsapp) identParts.push('WhatsApp ' + OPERATOR.whatsapp);
+    $('ident').innerHTML = identParts.map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('');
+    $('foot-ident').textContent = identParts.join(', ');
+    if (OPERATOR.photo) { var ph = $('photo'); ph.innerHTML = '<img src="' + OPERATOR.photo + '" alt="' + esc(OPERATOR.name || 'The person who replies') + '">'; ph.hidden = false; }
+
+    /* ================= worked examples ================= */
+    var EXAMPLES = [
+      { id: 'invoice', title: 'Supplier invoice to accounting system', becomes: 'Becomes a bill in Zoho Books', hint: 'Four fields entered, total matched to the PO', preview: 4, wide: true,
+        sub: 'A PDF from one of forty suppliers, each with its own layout. Four fields get keyed into the books; the total gets matched to the purchase order.',
+        hdr: ['AL RAYAN RACKING LLC', 'TAX INVOICE'], trn: 'TRN 100 4471 2830 003',
+        fields: [['Invoice no.', 'INV-20931', 1], ['Date', '14 AUG 2026', 1], ['Your ref.', 'PO-7712', 1], ['Terms', '30 days', 0]],
+        lines: [['Pallet racking, 12 bays', '3,960.00'], ['Delivery and install', '640.00'], ['VAT 5%', '230.00']], total: ['TOTAL DUE', 'AED 4,830.00', 1],
+        dest: { app: 'Zoho Books', kind: 'New bill', rows: [['Vendor', 'Al Rayan Racking LLC'], ['Bill no.', 'INV-20931'], ['Date', '2026-08-14'], ['PO', 'PO-7712'], ['Subtotal', '4,600.00'], ['VAT 5%', '230.00'], ['Total', '4,830.00'], ['PO match', 'PO says 4,600 plus VAT. Matches.', 0]] },
+        check: 'Anything the PO doesn’t explain, a price change or an extra line, is left as a draft with a note, not posted.' },
+      { id: 'bol', title: 'Bill of lading to shipment file and customer update', becomes: 'Updates the shipment file', hint: 'And drafts the customer email, unsent', preview: 4,
+        sub: 'Arrives from the carrier as a PDF. The shipment record gets updated, and the customer gets told the ETA. Both are usually typed by the same coordinator.',
+        hdr: ['BILL OF LADING', 'ORIGINAL 1 OF 3'],
+        fields: [['Shipper', 'HANWOO TEXTILES CO', 1], ['Consignee', 'AL NOOR FABRICS LLC', 1], ['Container', 'MSKU 482 1197-3', 1], ['Vessel', 'MSC ILONA / 2634W', 1], ['POL / POD', 'BUSAN / JEBEL ALI', 1], ['ETA', '22 SEP 2026', 1]],
+        dest: { app: 'Shipment file', kind: 'Job DXB-2261', rows: [['Container', 'MSKU4821197-3'], ['Vessel / voy.', 'MSC ILONA 2634W'], ['POL to POD', 'Busan to Jebel Ali'], ['ETA', '22 Sep 2026'], ['ETA changed', 'was 19 Sep at booking', 1]],
+          drafted: 'Draft to Al Noor Fabrics:\n\nContainer MSKU4821197-3 is on MSC Ilona, ETA Jebel Ali 22 Sep, three days later than booked. Original B/L attached. We will confirm customs clearance on arrival.' },
+        check: 'The ETA moved since booking. The record is updated, but the customer email stays a draft until someone hits send.' },
+      { id: 'cv', title: 'CV to candidate database', becomes: 'Becomes a candidate record', hint: 'Eight fields, formatted your way', preview: 3,
+        sub: 'CVs arrive in every layout there is. The same eight fields get retyped into the database so the candidate can be searched and shortlisted.',
+        hdr: ['CURRICULUM VITAE', 'PDF, 3 PAGES'],
+        fields: [['Name', 'Rita Okonkwo', 1], ['Current', 'Operations Manager, 4 yrs', 1], ['Previous', 'Ops Coordinator, 3 yrs', 1], ['Notice', '1 month', 1], ['Location', 'Sharjah', 1], ['Skills', 'WMS, Excel, customs docs', 1]],
+        dest: { app: 'Candidate database', kind: 'New candidate', rows: [['Name', 'Rita Okonkwo'], ['Title', 'Operations Manager'], ['Experience', '7 yrs (2 roles)'], ['Notice period', '1 month'], ['Location', 'Sharjah'], ['Skills', 'WMS, Excel, customs'], ['Dates', 'Jun 2022 to May 2023 overlap', 1]] },
+        check: 'Two roles overlap by three months. Probably a handover, but a person asks; the tool doesn’t guess.' },
+      { id: 'listing', title: 'Listing sheet to three portals', becomes: 'Fills three portals', hint: 'Each with its own field names', preview: 5,
+        sub: 'One property, three portals, three sets of field names. The same listing gets typed three times, then the price changes and it gets typed three more.',
+        hdr: ['LISTING SHEET', 'NEW, SALE'],
+        fields: [['Unit', '1204, Marina Gate 2', 1], ['Beds / baths', '2 / 3', 1], ['Size', '1,312 sq ft', 1], ['Price', 'AED 2,350,000', 1], ['Permit', 'RERA 71029354', 1], ['Furnished', 'Yes', 1]],
+        dest: { app: 'Three portals', kind: 'Field mapping', rows: [['Portal A, Bedrooms', '2'], ['Portal B, Beds', '2'], ['Portal C, BR', '2'], ['Size', '1,312 sqft / 121.9 m²'], ['Price', '2,350,000'], ['Permit no.', '71029354'], ['Price per sq ft', '1,791, above area median', 1]] },
+        check: 'Price per square foot is well above the area’s median. Flagged before it goes live, in case a digit is wrong.' },
+      { id: 'claim', title: 'Pre-approval to insurer portal', becomes: 'Fills the insurer portal', hint: 'Code by code, while the patient waits', preview: 4,
+        sub: 'A clinic’s front desk types the same treatment plan into the insurer’s portal, code by code, while the patient waits.',
+        hdr: ['TREATMENT PLAN', 'PRE-APPROVAL REQUEST'],
+        fields: [['Patient', '██████████', 0, 1], ['Member ID', '█████-4471', 0, 1], ['Policy', 'GOLD-DENTAL-2', 1], ['Tooth', '36', 1], ['Procedure', 'D2740 crown, zirconia', 1], ['Estimate', 'AED 2,900', 1]],
+        dest: { app: 'Insurer portal', kind: 'Pre-approval', rows: [['Member', '(from card scan)'], ['Policy', 'GOLD-DENTAL-2'], ['Tooth no.', '36'], ['Code', 'D2740'], ['Amount', '2,900.00'], ['Policy status', 'expired 31 Aug', 1]] },
+        check: 'The policy lapsed last month. Nothing is submitted; the front desk sees it before the patient sits down.' },
+      { id: 'quote', title: 'Quote to job sheet', becomes: 'Creates the job sheet', hint: 'From the quote the customer accepted', preview: 5,
+        sub: 'The quote is typed for the customer. When it’s accepted, the same lines get typed again for the crew’s job sheet, and the two drift apart.',
+        hdr: ['QUOTATION Q-1187', 'ACCEPTED'],
+        fields: [['Customer', 'Pearl Tower Mgmt', 1], ['Site', 'Level 14, plant room', 1], ['Item', 'AHU belt + bearing set x2', 1], ['Labour', '2 techs, 6 hrs', 1], ['Date', 'Fri 18 Sep, 14:00', 1], ['Total', 'AED 6,180', 1]],
+        dest: { app: 'Job sheet', kind: 'Job 0921', rows: [['Customer', 'Pearl Tower Mgmt'], ['Site', 'L14 plant room'], ['Parts', 'AHU belt + bearing x2'], ['Crew', '2 techs, 6 hrs'], ['Scheduled', 'Fri 18 Sep 14:00'], ['Access', 'Friday PM, confirm with building', 1]] },
+        check: 'Friday afternoon site access is usually restricted. The job is created; the slot is marked to confirm.' }
+    ];
+
+    function sheetHTML(ex, compact) {
+      var rows = compact ? ex.fields.slice(0, ex.preview || 4) : ex.fields;
+      var h = '<div class="sheet' + (compact ? '' : ' stack') + '"><div class="hdr"><b>' + esc(ex.hdr[0]) + (ex.trn ? '<small>' + esc(ex.trn) + '</small>' : '') + '</b><span>' + esc(ex.hdr[1]) + '</span></div><dl class="grid">';
+      rows.forEach(function (f) {
+        var v = f[3] ? '<span class="redact">' + esc(f[1]) + '</span>' : (f[2] ? '<span class="mk">' + esc(f[1]) + '</span>' : esc(f[1]));
+        h += '<dt>' + esc(f[0]) + '</dt><dd>' + v + '</dd>';
+      });
+      h += '</dl>';
+      var showMoney = !compact || ex.wide;
+      if (showMoney && ex.lines) h += '<div class="lines">' + ex.lines.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><span>' + esc(l[1]) + '</span></div>'; }).join('') + '</div>';
+      if (showMoney && ex.total) h += '<div class="total"><span>' + esc(ex.total[0]) + '</span><span class="mk">' + esc(ex.total[1]) + '</span></div>';
+      if (!compact) h += '<div class="stamp">Received</div>';
+      return h + '</div>';
+    }
+    function recordHTML(ex) {
+      var h = '<div class="rec"><div class="rec-title">' + esc(ex.dest.app) + '<span>' + esc(ex.dest.kind) + '</span></div><dl>';
+      ex.dest.rows.forEach(function (r) { h += '<dt>' + esc(r[0]) + '</dt><dd' + (r[2] ? ' class="flag"' : '') + '>' + esc(r[1]) + '</dd>'; });
+      h += '</dl>';
+      if (ex.dest.drafted) h += '<div class="drafted">' + esc(ex.dest.drafted) + '</div>';
+      h += '<div class="person"><span class="mk">Checked by a person:</span> ' + esc(ex.check) + '</div>';
+      return h + '</div>';
+    }
+    var gallery = $('gallery');
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement('button');
+      b.className = 'card' + (ex.wide ? ' wide' : ''); b.type = 'button'; b.setAttribute('data-open-ex', ex.id);
+      b.innerHTML = sheetHTML(ex, true) + '<div class="becomes">' + esc(ex.becomes) + '<small>' + esc(ex.hint) + '. Open the example.</small></div>';
+      gallery.appendChild(b);
+    });
+
+    /* ================= dialogs ================= */
+    var dlgSend = $('dlg-send'), dlgEx = $('dlg-ex');
+    var currentEx = 0;
+    function openDialog(d) {
+      if (d.open) return;
+      if (dlgSend.open && d !== dlgSend) dlgSend.close();
+      if (dlgEx.open && d !== dlgEx) dlgEx.close();
+      if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+      document.body.classList.add('modal-open');
+      d.scrollTop = 0;
+    }
+    function showExample(idx) {
+      currentEx = (idx + EXAMPLES.length) % EXAMPLES.length;
+      var ex = EXAMPLES[currentEx];
+      $('ex-title').textContent = ex.title;
+      $('ex-count').textContent = 'Example ' + (currentEx + 1) + ' of ' + EXAMPLES.length + '. Made-up firm, real shape.';
+      $('ex-sub').textContent = ex.sub;
+      $('ex-body').innerHTML =
+        '<div class="ex-col"><div class="spec-label"><span>Arrives as</span></div>' + sheetHTML(ex, false) + '</div>' +
+        '<div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>' +
+        '<div class="ex-col"><div class="spec-label"><span>Ends up as</span></div>' + recordHTML(ex) + '</div>';
+      if (location.hash !== '#ex-' + ex.id) history.replaceState(null, '', '#ex-' + ex.id);
+      openDialog(dlgEx);
+      $('ex-body').scrollTop = 0;
+    }
+    $('ex-prev').addEventListener('click', function () { showExample(currentEx - 1); });
+    $('ex-next').addEventListener('click', function () { showExample(currentEx + 1); });
+
+    function openSend() {
+      if (location.hash !== '#send') history.replaceState(null, '', '#send');
+      openDialog(dlgSend);
+      try { $('f-name').focus({ preventScroll: true }); } catch (e) {}
+    }
+    document.addEventListener('click', function (ev) {
+      var t = ev.target.closest('[data-open-send]');
+      if (t) { ev.preventDefault(); openSend(); return; }
+      var x = ev.target.closest('[data-open-ex]');
+      if (x) { ev.preventDefault(); var i = EXAMPLES.findIndex(function (e) { return e.id === x.getAttribute('data-open-ex'); }); showExample(i < 0 ? 0 : i); return; }
+      var c = ev.target.closest('[data-close]');
+      if (c) { var d = c.closest('dialog'); if (d) d.close(); }
+    });
+    [dlgSend, dlgEx].forEach(function (d) {
+      d.addEventListener('click', function (ev) { if (ev.target === d) d.close(); });
+      d.addEventListener('close', function () {
+        if (!dlgSend.open && !dlgEx.open) document.body.classList.remove('modal-open');
+        if (/^#(send|ex-)/.test(location.hash)) history.replaceState(null, '', '#home');
+      });
+    });
+
+    /* ================= routing ================= */
+    function route() {
+      var hash = location.hash || '#home';
+      if (hash === '#send') { openSend(); return; }
+      var m = hash.match(/^#ex-([a-z]+)$/);
+      if (m) { var i = EXAMPLES.findIndex(function (e) { return e.id === m[1]; }); showExample(i < 0 ? 0 : i); return; }
+      if (dlgSend.open) dlgSend.close();
+      if (dlgEx.open) dlgEx.close();
+      var el = document.getElementById(hash.slice(1));
+      if (el && hash !== '#home') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    window.addEventListener('hashchange', route);
+    route();
+
+    /* ================= reference token (matches the responder's check rule) ================= */
+    function makeToken() {
+      var body = '', sum = 0, rnd = new Uint8Array(5);
+      if (window.crypto && window.crypto.getRandomValues) { window.crypto.getRandomValues(rnd); }
+      else { for (var i = 0; i < 5; i++) rnd[i] = Math.floor(Math.random() * 256); }
+      for (var j = 0; j < 5; j++) { var idx = rnd[j] % 32; body += ALPHABET.charAt(idx); sum += idx * (j + 1); }
+      return 'DOC-' + body + ALPHABET.charAt(sum % 32);
+    }
+    var token;
+    try { token = localStorage.getItem('bluestamp.token'); } catch (e) {}
+    if (!token || !/^DOC-[A-Z2-9]{6}$/.test(token)) { token = makeToken(); try { localStorage.setItem('bluestamp.token', token); } catch (e) {} }
+    $('ref-label').textContent = token;
+
+    /* ================= the form: sends from this page ================= */
+    var fields = ['f-name', 'f-email', 'f-company', 'f-doc', 'f-vol', 'f-dest', 'f-more'];
+    function val(id) { return ($(id).value || '').trim(); }
+    function subjectLine() { var company = val('f-company'); return 'One document' + (company ? ' from ' + company : '') + ' (' + token + ')'; }
+    function fileInfo() { var f = $('f-file').files && $('f-file').files[0]; return f ? 'Attached: ' + f.name + ' (' + Math.max(1, Math.round(f.size / 1024)) + ' KB)' : 'No document attached yet.'; }
+    function render() {
+      var subject = subjectLine();
+      $('p-subject').textContent = subject;
+      $('h-subject').value = subject;
+      $('h-replyto').value = val('f-email');
+      $('h-ref').value = token;
+      var lines = ['Company: ' + val('f-company'), 'Email: ' + val('f-email'), 'What this document is: ' + val('f-doc'),
+                   'Roughly how many a week: ' + val('f-vol'), 'Where it ends up (which system): ' + val('f-dest')];
+      if (val('f-more')) { lines.push(''); lines.push(val('f-more')); }
+      lines.push('');
+      if (val('f-name')) lines.push(val('f-name'));
+      lines.push('ref: ' + token);
+      $('p-body').textContent = lines.join('\n');
+      $('p-att').textContent = fileInfo();
+      try { localStorage.setItem('bluestamp.draft', JSON.stringify(fields.map(val))); } catch (e) {}
+    }
+    try {
+      var saved = JSON.parse(localStorage.getItem('bluestamp.draft') || 'null');
+      if (Array.isArray(saved)) fields.forEach(function (id, i) { if (saved[i]) $(id).value = saved[i]; });
+    } catch (e) {}
+    fields.forEach(function (id) { $(id).addEventListener('input', render); });
+    $('f-file').addEventListener('change', function () {
+      var f = $('f-file').files && $('f-file').files[0];
+      if (f && f.size > 10 * 1024 * 1024) { $('f-file').value = ''; $('status').textContent = 'That file is over 10 MB. A photo of the page or a PDF export will be smaller.'; }
+      else { $('status').textContent = ''; }
+      render();
+    });
+    render();
+    var LIVE_SITE = '';  // set to the real address (e.g. 'https://yourname.github.io/bluestamp/') once the page is hosted; the preview then points there
+    $('form').addEventListener('submit', function (ev) {
+      if (!val('f-email')) { ev.preventDefault(); $('status').textContent = 'Add your email so the video has somewhere to go.'; $('f-email').focus(); return; }
+      if (window.claude) {
+        // Inside the Claude preview the browser blocks form submissions, so say so instead of showing a blocked page.
+        ev.preventDefault();
+        $('status').textContent = LIVE_SITE
+          ? 'This is the preview copy. Send from the live site: ' + LIVE_SITE
+          : 'This is the preview copy and cannot send from here. Email ' + OPERATOR.email + ' with the file attached and “one document” in the subject; it reaches me the same way.';
+        return;
+      }
+      render();
+      $('status').textContent = 'Sending…';
+      try { localStorage.removeItem('bluestamp.draft'); } catch (e) {}
+      setTimeout(function () {
+        if (document.visibilityState === 'visible') {
+          $('status').textContent = 'This page could not send from here. Email ' + OPERATOR.email + ' with the file attached and “one document” in the subject, and it reaches me the same way.';
+        }
+      }, 2500);
+    });
+
+    /* ================= hero specimen: mark, lift, land (the one orchestrated moment) ================= */
+    var spec = $('spec');
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function play() {
+      if (reduced) { spec.classList.add('marked'); return; }
+      spec.classList.remove('marked');
+      var stamp = $('stamp'), ok = $('ok');
+      stamp.style.transition = 'none'; stamp.style.transform = 'rotate(-8deg) scale(0)'; stamp.style.opacity = '0';
+      ok.style.transition = 'none'; ok.style.transform = 'scale(0.6)'; ok.style.opacity = '0';
+      void spec.offsetWidth;
+      setTimeout(function () { spec.classList.add('marked'); }, 350);
+      setTimeout(function () {
+        var k = 0;
+        spec.querySelectorAll('[data-src]').forEach(function (src) {
+          var dst = spec.querySelector('[data-dst="' + src.getAttribute('data-src') + '"]');
+          if (!dst) return;
+          var a = src.getBoundingClientRect(), b = dst.getBoundingClientRect();
+          var fly = document.createElement('span');
+          fly.className = 'fly'; fly.textContent = src.textContent;
+          fly.style.left = a.left + 'px'; fly.style.top = a.top + 'px';
+          fly.style.transitionDelay = (k * 90) + 'ms, ' + (550 + k * 90) + 'ms';
+          document.body.appendChild(fly);
+          var dx = b.left + 12 - a.left, dy = b.top + (b.height - a.height) / 2 - a.top;
+          requestAnimationFrame(function () { requestAnimationFrame(function () { fly.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(.92)'; fly.style.opacity = '0'; }); });
+          setTimeout(function () { if (fly.parentNode) fly.parentNode.removeChild(fly); }, 1400 + k * 90);
+          k++;
+        });
+      }, 1050);
+      setTimeout(function () { ok.style.transition = 'transform .3s cubic-bezier(.3,1.6,.4,1), opacity .2s'; ok.style.transform = 'scale(1)'; ok.style.opacity = '1'; }, 1900);
+      setTimeout(function () { stamp.style.transition = 'transform .28s cubic-bezier(.3,1.8,.4,1), opacity .15s'; stamp.style.transform = 'rotate(-8deg) scale(1)'; stamp.style.opacity = '.9'; $('replay').hidden = false; }, 2250);
+    }
+    $('replay').addEventListener('click', play);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { setTimeout(play, 150); }); }
+    else { window.addEventListener('load', function () { setTimeout(play, 300); }); }
+  })();
+</script>
+
+</body>
+</html>
