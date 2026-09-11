@@ -771,7 +771,7 @@
       var subject = subjectLine();
       $('p-subject').textContent = subject;
       $('h-subject').value = subject;
-      $('h-replyto').value = val('f-email');
+      $('h-replyto').value = val('f-email').replace(/\+/g, '%2B');  // FormSubmit URL-decodes values, so a literal + would arrive as a space
       $('h-ref').value = token;
       $('h-next').value = location.origin + location.pathname.replace(/[^/]*$/, '') + 'thanks.html?ref=' + encodeURIComponent(token);
       $('nofile').hidden = !!($('f-file').files && $('f-file').files.length);
