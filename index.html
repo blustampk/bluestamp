@@ -15,12 +15,34 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
-</head>
-<body>
-
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F6F4">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#15171C">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://blustampk.github.io/bluestamp/#org",
+      "name": "Bluestamp",
+      "url": "https://blustampk.github.io/bluestamp/",
+      "email": "komissarovb57@gmail.com",
+      "areaServed": "Dubai",
+      "address": { "@type": "PostalAddress", "addressLocality": "Dubai", "addressCountry": "AE" }
+    },
+    {
+      "@type": "Service",
+      "name": "Custom document tools for small firms",
+      "description": "Send one document your team retypes by hand; get a short video of the same fields entering themselves, made on your file.",
+      "provider": { "@id": "https://blustampk.github.io/bluestamp/#org" },
+      "areaServed": "Dubai",
+      "serviceType": "Document data entry tools",
+      "url": "https://blustampk.github.io/bluestamp/"
+    }
+  ]
+}
+</script>
 <style>
   :root {
     --ground: #F5F6F4;
@@ -36,6 +58,8 @@
     --sheet-ink: #1B1F26;
     --sheet-muted: #6B7078;
     --sheet-rule: #DADDE2;
+    --sheet-2: #EEF0EC;         /* a second tone of paper: buttons and blocks that sit on a white sheet, in both themes */
+    --stamp-sheet: #1F4DA1;     /* the stamp blue as it prints on white paper; never changes with the theme */
     --marker: #FFE977;
     --marker-ink: #1B1F26;
     --good: #1E7A4B;
@@ -122,6 +146,7 @@
   /* ---------- sheets (the paperwork zone: caps allowed here only) ---------- */
   .sheet { background: var(--sheet); color: var(--sheet-ink); box-shadow: var(--shadow); border-radius: 2px; padding: 24px 26px 22px;
            font-family: "Courier Prime", "Courier New", monospace; font-size: .88rem; line-height: 1.5; position: relative; }
+  .sheet.stack { padding-bottom: 60px; }
   .sheet.stack::before { content: ""; position: absolute; inset: 6px -6px -8px 8px; background: var(--sheet); border-radius: 2px; z-index: -1; transform: rotate(1.4deg); box-shadow: var(--shadow-sm); opacity: .9; }
   .sheet .hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--sheet-rule); padding-bottom: 10px; margin-bottom: 12px; }
   .sheet .hdr b { font-weight: 700; letter-spacing: .04em; }
@@ -136,11 +161,14 @@
   .sheet .redact { display: inline-block; background: var(--sheet-ink); color: transparent; border-radius: 1px; user-select: none; }
   .mk { color: var(--marker-ink); padding: 0 .25em; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
         background: linear-gradient(var(--marker), var(--marker)) no-repeat left / 100% 100%; }
-  .stamp { position: absolute; right: 20px; bottom: 18px; transform: rotate(-8deg); border: 2px solid var(--stamp); color: var(--stamp); border-radius: 3px;
+  .stamp { position: absolute; right: 20px; bottom: 18px; transform: rotate(-8deg); border: 2px solid var(--stamp-sheet); color: var(--stamp-sheet); border-radius: 3px;
            font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: .74rem; letter-spacing: .16em; padding: 5px 9px; opacity: .9; text-transform: uppercase; }
   .note-sheet { padding: 18px 20px; font-size: .86rem; max-width: 60ch; }
   .note-sheet p { margin: 0 0 6px; }
   .note-sheet p:last-child { margin: 0; }
+  .demo { margin: 0; display: grid; gap: 10px; max-width: 640px; border-top: 1px solid var(--rule); padding-top: 18px; }
+  .demo video { display: block; width: 100%; height: auto; background: var(--sheet); border-radius: 2px; box-shadow: var(--shadow-sm); }
+  .demo figcaption { font-size: .88rem; color: var(--muted); max-width: 60ch; }
 
   /* ---------- hero specimen animation ---------- */
   .specimen { display: grid; gap: 14px; position: relative; }
@@ -157,6 +185,11 @@
   .row td { padding: 9px 12px 11px; white-space: nowrap; }
   .row td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .row td.ok { color: var(--good); font-weight: 700; }
+  @media (max-width: 480px) {
+    .row table { min-width: 0; }
+    .row th, .row td { padding-left: 8px; padding-right: 8px; }
+    .row th:nth-child(1), .row td:nth-child(1), .row th:nth-child(3), .row td:nth-child(3) { display: none; }
+  }
   .fly { position: fixed; z-index: 50; pointer-events: none; font-family: "Courier Prime", "Courier New", monospace; font-size: .86rem; color: var(--marker-ink);
          background: var(--marker); padding: 0 .25em; border-radius: 2px; will-change: transform, opacity; transition: transform .7s cubic-bezier(.4,0,.2,1), opacity .2s .55s; }
   .open-ex { position: absolute; inset: 0; background: none; border: 0; cursor: pointer; border-radius: 2px; }
@@ -246,7 +279,7 @@
   .field input:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--stamp); outline-offset: 1px; border-color: var(--stamp); }
   .field textarea { min-height: 88px; resize: vertical; }
   .field input[type="file"] { padding: 10px 12px; background: var(--ground-2); cursor: pointer; }
-  .field input[type="file"]::file-selector-button { font: 600 .88rem "Public Sans", sans-serif; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; margin-right: 10px; cursor: pointer; }
+  .field input[type="file"]::file-selector-button { font: 600 .88rem "Public Sans", sans-serif; color: var(--sheet-ink); background: var(--sheet-2); border: 1px solid var(--sheet-rule); border-radius: 4px; padding: 6px 10px; margin-right: 10px; cursor: pointer; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
   .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
@@ -258,7 +291,7 @@
   .mail .line b { font-weight: 600; word-break: break-word; }
   .mail pre { margin: 0; padding: 18px; white-space: pre-wrap; word-wrap: break-word; font-family: "Courier Prime", "Courier New", monospace; font-size: .88rem; line-height: 1.55; color: var(--sheet-ink); min-height: 200px; }
   .mail .att { padding: 12px 18px; border-top: 1px dashed var(--sheet-rule); font-size: .85rem; color: var(--sheet-muted); }
-  .sent-stamp { position: absolute; right: 22px; bottom: 54px; transform: rotate(-10deg) scale(1); border: 3px solid var(--stamp); color: var(--stamp); border-radius: 4px; padding: 8px 14px;
+  .sent-stamp { position: absolute; right: 22px; bottom: 54px; transform: rotate(-10deg) scale(1); border: 3px solid var(--stamp-sheet); color: var(--stamp-sheet); border-radius: 4px; padding: 8px 14px;
                 font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: .14em; text-transform: uppercase; opacity: .92; pointer-events: none; }
 
   /* example dialog */
@@ -275,7 +308,7 @@
   .rec dd { font-family: "Courier Prime", "Courier New", monospace; }
   .rec dd.flag { color: var(--warn); }
   .rec dl > :nth-last-child(-n+2) { border-bottom: 0; }
-  .rec .drafted { padding: 12px 16px; border-top: 1px solid var(--sheet-rule); font-size: .86rem; color: var(--sheet-ink); white-space: pre-wrap; font-family: "Courier Prime", "Courier New", monospace; background: var(--ground-2); }
+  .rec .drafted { padding: 12px 16px; border-top: 1px solid var(--sheet-rule); font-size: .86rem; color: var(--sheet-ink); white-space: pre-wrap; font-family: "Courier Prime", "Courier New", monospace; background: var(--sheet-2); }
   .rec .person { padding: 12px 16px; border-top: 1px solid var(--sheet-rule); font-family: "Courier Prime", "Courier New", monospace; font-size: .86rem; line-height: 1.6; }
   .ex-foot { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule); }
   .ex-nav { display: flex; gap: 8px; }
@@ -285,6 +318,12 @@
   .toast.show { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap">
+</head>
+<body>
+
 
 <div class="wrap">
   <div class="top">
@@ -375,6 +414,10 @@
         <p>No voice-over, no music, nothing staged. If something in your file couldn’t be read, the recording shows the gap instead of hiding it.</p>
         <p>Under two minutes, sent as a file in the email so you can forward it.</p>
       </div>
+      <figure class="demo">
+        <video controls preload="none" playsinline muted poster="demo-poster.jpg" width="1280" height="720" src="demo.mp4"></video>
+        <figcaption>A sample, made on the example invoice above, not a client file. Yours is made on your document.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -384,7 +427,7 @@
       <h2>What happens to the file you send</h2>
       <ul class="plain">
         <li><b>Who opens it:</b> me, nobody else. One person, not a team, not a contractor.</li>
-        <li><b>Where it goes:</b> my laptop in Dubai, and the document-reading service I build with (Anthropic), which runs outside the UAE, keeps its logs for up to 30 days and does not train on them.</li>
+        <li><b>Where it goes:</b> my laptop in Dubai, the form service that carries it (FormSubmit), my Gmail, and the document-reading service I build with (Anthropic), which runs outside the UAE and keeps a copy only for a limited time under its published policy.</li>
         <li><b>What is never done with it:</b> not shown to anyone, not used as an example, not put in a shared folder.</li>
         <li><b>When it is deleted:</b> seven days after your video, from my machine, whether or not you write back.</li>
       </ul>
@@ -489,7 +532,7 @@
         <div class="field"><label for="f-more">Anything else <small>optional</small></label><textarea id="f-more" name="anything_else" placeholder="Two of us do it every Tuesday morning. The supplier layouts change all the time."></textarea></div>
         <div class="field"><label for="f-file">The document <small>PDF, photo or scan, up to 10 MB. Redact anything you like.</small></label><input id="f-file" name="attachment" type="file" accept=".pdf,image/*,.xlsx,.xls,.csv,.docx,.doc"><p class="muted small" id="nofile">No document attached: the reply will be one question rather than a video. Attach one and the video follows.</p></div>
         <div class="actions">
-          <button class="btn" type="submit">Send</button>
+          <button class="btn" type="submit" id="send-btn">Send</button>
         </div>
         <p class="muted small">Sent from this page, file included. You land on a short confirmation page with your reference number; a link there brings you back. If nothing happens, email <span class="mono" data-op="email">komissarovb57@gmail.com</span> with the file attached and “one document” in the subject.</p>
         <p class="status" id="status" role="status" aria-live="polite"></p>
@@ -679,7 +722,12 @@
       if (c) { var d = c.closest('dialog'); if (d) d.close(); }
     });
     [dlgSend, dlgEx].forEach(function (d) {
-      d.addEventListener('click', function (ev) { if (ev.target === d) d.close(); });
+      d.addEventListener('click', function (ev) {
+        // Close only on the backdrop itself: a click on the dialog's own scrollbar also targets the dialog, and must not lose a half-filled form.
+        if (ev.target !== d) return;
+        var r = d.getBoundingClientRect();
+        if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom) d.close();
+      });
       d.addEventListener('close', function () {
         if (!dlgSend.open && !dlgEx.open) document.body.classList.remove('modal-open');
         if (lastTrigger && document.contains(lastTrigger) && !dlgSend.open && !dlgEx.open) { try { lastTrigger.focus(); } catch (e) {} }
@@ -749,6 +797,7 @@
       render();
     });
     render();
+    var sendBtn = $('send-btn'), sendTimer = null;
     var LIVE_SITE = '';  // set to the real address (e.g. 'https://yourname.github.io/bluestamp/') once the page is hosted; the preview then points there
     $('form').addEventListener('submit', function (ev) {
       if (!val('f-email')) { ev.preventDefault(); $('status').textContent = 'Add your email so the video has somewhere to go.'; $('f-email').focus(); return; }
@@ -761,13 +810,18 @@
         return;
       }
       render();
-      $('status').textContent = 'Sending…';
+      // The hidden fields now carry this reference; forget it so the next visit mints a fresh one.
+      try { localStorage.removeItem('bluestamp.token'); } catch (e) {}
       try { localStorage.removeItem('bluestamp.draft'); } catch (e) {}
-      setTimeout(function () {
-        if (document.visibilityState === 'visible') {
-          $('status').textContent = 'This page could not send from here. Email ' + OPERATOR.email + ' with the file attached and “one document” in the subject, and it reaches me the same way.';
-        }
-      }, 2500);
+      sendBtn.disabled = true; sendBtn.setAttribute('aria-busy', 'true'); sendBtn.textContent = 'Sending';
+      $('status').textContent = 'Sending. Keep this tab open; the confirmation page with your reference number comes next.';
+      // A 10 MB file on a phone can take a while, so nothing is declared failed early. Nothing happens on pagehide: leaving is the upload succeeding.
+      clearTimeout(sendTimer);
+      sendTimer = setTimeout(function () {
+        if (document.visibilityState !== 'visible') return;
+        sendBtn.disabled = false; sendBtn.removeAttribute('aria-busy'); sendBtn.textContent = 'Send';
+        $('status').textContent = 'That is taking longer than it should. Email ' + OPERATOR.email + ' with the file attached and “one document” in the subject; it reaches me the same way.';
+      }, 45000);
     });
 
     /* ================= hero specimen: mark, lift, land (the one orchestrated moment) ================= */
@@ -785,7 +839,7 @@
         var k = 0;
         spec.querySelectorAll('[data-src]').forEach(function (src) {
           var dst = spec.querySelector('[data-dst="' + src.getAttribute('data-src') + '"]');
-          if (!dst) return;
+          if (!dst || !dst.offsetWidth) return;   // a column hidden on narrow screens has nowhere to land
           var a = src.getBoundingClientRect(), b = dst.getBoundingClientRect();
           var fly = document.createElement('span');
           fly.className = 'fly'; fly.textContent = src.textContent;
